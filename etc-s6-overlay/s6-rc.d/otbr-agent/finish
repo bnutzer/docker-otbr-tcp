@@ -1,0 +1,6 @@
+#!/command/with-contenv /bin/bash
+set -eu
+if [[ -x /usr/local/bin/otbr-dataset.sh ]] ; then
+	exec /usr/local/bin/otbr-dataset.sh backup
+fi
+exit 0

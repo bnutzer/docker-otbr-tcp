@@ -1,0 +1,18 @@
+#!/command/with-contenv /bin/bash
+
+set -eux
+
+verifyenvvars="OTBR_WEB_PORT OTBR_WEB_IFACE"
+
+for var in $verifyenvvars; do
+    value="${!var:-}"
+
+    if [[ -z "$value" ]]; then
+        echo "ERROR: Environment variable '$var' is not set or empty"
+        exit 1
+    fi
+
+    echo "INFO: $var=$value"
+done
+
+exec /usr/sbin/otbr-web -I "${OTBR_WEB_IFACE}" -d6 -s -p "${OTBR_WEB_PORT}" -a "${OTBR_LISTEN_ADRESS:-0.0.0.0}"

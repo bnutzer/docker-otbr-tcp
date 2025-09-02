@@ -1,0 +1,9 @@
+#!/bin/bash -eu
+
+mkdir -p /var/run/dbus
+
+exec /usr/bin/dbus-daemon \
+    --system \
+    --nofork \
+    --nopidfile \
+    --syslog

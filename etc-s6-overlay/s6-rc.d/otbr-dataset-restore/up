@@ -1,0 +1,2 @@
+#!/command/with-contenv /bin/bash
+exec /usr/local/bin/otbr-dataset.sh restore

@@ -1,0 +1,6 @@
+#!/command/with-contenv /bin/bash
+
+while :; do
+	/usr/local/bin/otbr-dataset.sh backup
+	sleep ${OTBR_BACKUP_INTERVAL:-600}
+done
