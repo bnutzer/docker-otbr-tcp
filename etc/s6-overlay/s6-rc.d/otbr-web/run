@@ -1,0 +1,15 @@
+#!/command/with-contenv /bin/bash
+
+set -eu
+
+if [[ "${OTBR_WEB_ENABLE}" -eq "0" ]] ; then
+	echo "otbr-web disabled."
+	exec sleep infinity
+fi
+
+exec /usr/sbin/otbr-web \
+	-I "${OTBR_THREAD_IF}" \
+	-d${OTBR_LOG_LEVEL_INT} \
+	-s \
+	-p "${OTBR_WEB_PORT}" \
+	-a "${OTBR_WEB_LISTEN_ADDRESS}"

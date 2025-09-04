@@ -1,0 +1,16 @@
+#!/command/with-contenv bash
+
+set -eu
+
+if [[ "$RCP_USE_TCP" == "0" ]] ; then
+	exit 0
+fi
+
+for i in $(seq 1 120); do
+  if [[ -e "$RCP_TTY" ]] && [[ -r "$RCP_TTY" ]]; then
+    exit 0
+  fi
+  sleep 1
+done
+echo "socat-ready: TTY $RCP_TTY NOT ready" >&2
+exit 1

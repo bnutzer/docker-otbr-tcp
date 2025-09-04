@@ -29,10 +29,31 @@ RUN set -eux; \
 	tar -C / -Jxpf /tmp/s6-arch.tar.xz; \
 	rm -f /tmp/s6-*.tar.xz
 
-ENTRYPOINT ["/init"]
-
 ENV PATH=${PATH}:/command
 
-# COPY services.d /etc/services.d
-ADD otbr-dataset.sh /usr/local/bin/otbr-dataset.sh
-COPY etc-s6-overlay /etc/s6-overlay
+COPY etc /etc
+COPY usr /usr
+
+ENV OTBR_LOG_LEVEL_INT="6"
+
+ENV RCP_USE_TCP="1"
+ENV SOCAT_STARTUP_GRACE_PERIOD="2"
+ENV RCP_TTY="/tmp/ttyOTBR"
+ENV RCP_BAUDRATE="460800"
+ENV SOCAT_SOURCE_PARAMETERS=",raw,echo=0,wait-slave,ignoreeof"
+ENV SOCAT_DESTINATION_PARAMETERS=",nodelay,keepalive,forever,interval=5"
+
+ENV OTBR_REST_LISTEN_ADRESS="0.0.0.0"
+ENV OTBR_REST_LISTEN_PORT="8081"
+ENV OTBR_THREAD_IF="wpan0"
+ENV OTBR_BACKBONE_IF="eth0"
+ENV OTBR_RCP_ADDITIONAL_ARGS=&uart-flow-control
+
+
+ENV OTBR_BACKUP_INTERVAL="600"
+
+ENV OTBR_WEB_ENABLE="0"
+ENV OTBR_WEB_PORT="8080"
+ENV OTBR_WEB_LISTEN_ADDRESS="0.0.0.0"
+
+ENTRYPOINT ["/init"]
