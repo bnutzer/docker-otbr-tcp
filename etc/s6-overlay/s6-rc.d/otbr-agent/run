@@ -1,0 +1,19 @@
+#!/command/with-contenv /bin/bash
+
+set -eu
+
+if [[ $RCP_USE_TCP -gt 0 ]] ; then
+	echo -n "Sleeping for ${SOCAT_STARTUP_GRACE_PERIOD}s to give socat time to come up ... "
+	sleep "${SOCAT_STARTUP_GRACE_PERIOD}"
+	echo "Proceeding."
+fi
+
+echo "Starting otbr-agent ..."
+
+exec 
+    "/usr/sbin/otbr-agent" -I ${OTBR_THREAD_IF} -B "${OTBR_BACKBONE_IF}" \
+        --rest-listen-address "${OTBR_REST_LISTEN_ADRESS}" \
+        --rest-listen-port "${OTBR_REST_LISTEN_PORT}" \
+        -d${OTBR_LOG_LEVEL_INT} -v -s \
+        "spinel+hdlc+uart://${RCP_TTY:-/tmp/ttyOTBR}?uart-baudrate=${RCP_BAUDRATE:-460800}${OTBR_RCP_ADDITIONAL_ARGS:-}" \
+        "trel://${OTBR_BACKBONE_IF}"

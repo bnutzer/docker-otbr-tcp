@@ -1,0 +1,7 @@
+#!/command/with-contenv /bin/bash
+
+while :; do
+	sleep ${OTBR_BACKUP_INTERVAL}
+	echo "Creating dataset backup ..."
+	/usr/local/bin/otbr-dataset.sh backup
+done

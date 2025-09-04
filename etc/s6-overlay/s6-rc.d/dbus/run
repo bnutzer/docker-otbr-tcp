@@ -1,0 +1,10 @@
+#!/bin/bash -eu
+
+echo "Starting dbus-daemon ..."
+mkdir -p /var/run/dbus
+
+exec /usr/bin/dbus-daemon \
+    --system \
+    --nofork \
+    --nopidfile \
+    --syslog

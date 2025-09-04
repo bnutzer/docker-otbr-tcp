@@ -1,0 +1,20 @@
+#!/command/with-contenv /bin/bash
+
+set -eu
+
+if [[ "${RCP_USE_TCP}" -eq "0" ]] ; then
+	echo "RCP over tcp (socat) disabled."
+	exec sleep infinity
+fi
+
+if [[ -z "${RCP_HOST:-}" ]]; then
+    echo "ERROR: RCP_HOST environment variable is not set"
+    exit 1
+fi
+
+echo "Starting socat ..."
+
+exec /usr/bin/socat -d -d \
+  -ly -lf /var/log/socat-otrcp.log \
+  pty,link=${RCP_TTY}${SOCAT_SOURCE_PARAMETERS} \
+  tcp:${RCP_HOST}:${RCP_PORT}${SOCAT_DESTINATION_PARAMETERS}

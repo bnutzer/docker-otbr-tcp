@@ -1,0 +1,4 @@
+#!/command/with-contenv sh
+set -eu
+# schreibe im s6-Format auf STDOUT (Docker)
+exec s6-log -tt - <&0

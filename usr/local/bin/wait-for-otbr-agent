@@ -1,0 +1,14 @@
+#!/command/with-contenv bash
+
+set -eu
+
+for i in $(seq 1 180); do
+	if ot-ctl state >/dev/null 2>&1; then
+		# Valid response. Give service a few additional seconds.
+		sleep 10
+		exit 0
+	fi
+	sleep 1
+done
+echo "otbr-agent-ready: ot-ctl never responded, startup failed." >&2
+exit 1
