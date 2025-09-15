@@ -3,7 +3,7 @@
 set -eu
 
 for i in $(seq 1 180); do
-	if ot-ctl state >/dev/null 2>&1; then
+	if wrap-ot-ctl state >/dev/null 2>&1; then
 		# Valid response. Give service a few additional seconds.
 		echo "otbr-agent is ready."
 		sleep 3

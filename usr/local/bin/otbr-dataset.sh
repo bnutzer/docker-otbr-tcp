@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv bash
 # otbr-dataset.sh — persists and restores the thread dataset in a file
 # Usage:
 #   otbr-dataset.sh restore   # Loads dataset.hex (if available) and starts Thread
@@ -11,7 +11,6 @@ set -eu
 STATE_DIR="${OTBR_STATE_DIR:-/var/lib/otbr}"
 DATASET_FILE="$STATE_DIR/dataset.hex"
 TMP_FILE="$DATASET_FILE.tmp"
-OTBR_THREAD_IF=${OTBR_THREAD_IF:-wpan0}
 
 log() {
 	printf '%s %s\n' "[$(date +%F\ %T)]" "$*"
@@ -19,7 +18,7 @@ log() {
 
 wait_otctl() {
 	i=0
-	while ! ot-ctl -I ${OTBR_THREAD_IF} state >/dev/null 2>&1 ; do
+	while ! wrap-ot-ctl state >/dev/null 2>&1 ; do
 		i=$((i+1))
 		if [ "$i" -ge 60 ] ; then
 			log "ot-ctl not ready"
@@ -47,31 +46,31 @@ restore() {
 				exit 1
 				;;
 			(*)
-				ot-ctl -I ${OTBR_THREAD_IF} dataset set active "$HEX"
+				wrap-ot-ctl dataset set active "$HEX"
 				;;
 		esac
 
-		ot-ctl -I ${OTBR_THREAD_IF} dataset commit active
+		wrap-ot-ctl dataset commit active
 	else
-		if ot-ctl -I ${OTBR_THREAD_IF} dataset active >/dev/null 2>&1; then
+		if wrap-ot-ctl dataset active >/dev/null 2>&1; then
 			log "no persisted dataset, backing up currently active dataset"
-			ot-ctl -I ${OTBR_THREAD_IF} dataset active -x > "$TMP_FILE"
+			wrap-ot-ctl dataset active -x > "$TMP_FILE"
 			mv -f "$TMP_FILE" "$DATASET_FILE"
 		else
 			log "no active dataset present -> initializing new dataset"
-			ot-ctl -I ${OTBR_THREAD_IF} dataset init new
-			ot-ctl -I ${OTBR_THREAD_IF} dataset commit active
-			ot-ctl -I ${OTBR_THREAD_IF} dataset active -x > "$TMP_FILE"
+			wrap-ot-ctl dataset init new
+			wrap-ot-ctl dataset commit active
+			wrap-ot-ctl dataset active -x > "$TMP_FILE"
 			mv -f "$TMP_FILE" "$DATASET_FILE"
 		fi
 	fi
 
 	# Activate interface/Thread (idempotent)
-	ot-ctl -I ${OTBR_THREAD_IF} ifconfig up
-	ot-ctl -I ${OTBR_THREAD_IF} thread start
+	wrap-ot-ctl ifconfig up
+	wrap-ot-ctl thread start
 
 	# YMMV :)
-	ot-ctl -I ${OTBR_THREAD_IF} nat64 disable || true
+	wrap-ot-ctl nat64 disable || true
 
 	log "restore done"
 }
@@ -79,11 +78,11 @@ restore() {
 backup() {
 	ensure_dir
 	wait_otctl
-	if ! ot-ctl -I ${OTBR_THREAD_IF} dataset active >/dev/null 2>&1; then
+	if wrap-ot-ctl dataset active >/dev/null 2>&1; then
 		log "no active dataset (disabled?) — skipping backup"
 		exit 0
 	fi
-	ot-ctl -I ${OTBR_THREAD_IF} dataset active -x > "$TMP_FILE"
+	wrap-ot-ctl dataset active -x > "$TMP_FILE"
 	if grep -q "^Error" $TMP_FILE ; then
 		log "ot-ctl active responded with error. Skipping backup."
 		exit 0

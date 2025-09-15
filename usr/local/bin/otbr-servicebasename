@@ -1,10 +1,10 @@
-#!/bin/bash -eu
+#!/command/with-contenv bash
 
-OTBR_THREAD_IF=${OTBR_THREAD_IF:-wpan0}
+exec &>/var/log/servicebasename
 
 if [[ -z "${OTBR_SERVICEBASENAME:-}" ]] ; then
 	exit 0
 fi
 
-echo "Updating service basename to ${OTBR_SERVICEBASENAME} ..."
-ot-ctl -I "${OTBR_THREAD_IF}" ba servicebasename "${OTBR_SERVICEBASENAME}"
+echo "Updating service basename to '${OTBR_SERVICEBASENAME}' ..."
+wrap-ot-ctl ba servicebasename "${OTBR_SERVICEBASENAME}"

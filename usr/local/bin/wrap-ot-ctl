@@ -1,0 +1,5 @@
+#!/command/with-contenv bash
+
+set -eu
+
+exec flock /tmp/ot-ctl.lock ot-ctl -I "${OTBR_THREAD_IF}" "${@}"
