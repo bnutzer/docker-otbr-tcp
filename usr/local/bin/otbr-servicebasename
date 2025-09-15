@@ -1,0 +1,10 @@
+#!/bin/bash -eu
+
+OTBR_THREAD_IF=${OTBR_THREAD_IF:-wpan0}
+
+if [[ -z "${OTBR_SERVICEBASENAME:-}" ]] ; then
+	exit 0
+fi
+
+echo "Updating service basename to ${OTBR_SERVICEBASENAME} ..."
+ot-ctl -I "${OTBR_THREAD_IF}" ba servicebasename "${OTBR_SERVICEBASENAME}"

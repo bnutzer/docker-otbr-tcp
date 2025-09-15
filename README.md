@@ -39,6 +39,7 @@ OTBR in this image can be configured by setting environment variables (see below
 | agent, web | OTBR_THREAD_IF | wpan0 | TUN device created and used by OTBR. Set to a different device for running multiple instances |
 | agent | OTBR_BACKBONE_IF | eth0 | Local network device |
 | agent | OTBR_RCP_ADDITIONAL_ARGS | &uart-flow-control | RCP arguments to pass to OTBR. Default enables flow control |
+| agent | OTBR_SERVICEBASENAME | | Set service base name of router. Defaults to "OpenThread BR (unspecified vendor)" and will be appended an identifier |
 | backup | OTBR_BACKUP_INTERVAL | 600 | Dataset backup interval in seconds |
 | web | OTBR_WEB_ENABLE | 0 | Enable OTBR web interface by setting this value to "1" |
 | web | OTBR_WEB_PORT | 8080 | Port for web interface |
