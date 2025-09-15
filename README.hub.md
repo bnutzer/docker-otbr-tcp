@@ -12,7 +12,7 @@ For complete documentation, configuration details, and source code, visit the Gi
 
 ## 📦 Image Tags
 
-- **`latest`** - Latest stable release
+- **`latest`** - Latest release. Stability depends on upstream image.
 - **`YYYYMMDD`** - Date-based releases (e.g., `20250905`)
 
 All images support both `linux/amd64` and `linux/arm64` architectures.
