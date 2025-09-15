@@ -5,7 +5,8 @@ set -eu
 for i in $(seq 1 180); do
 	if ot-ctl state >/dev/null 2>&1; then
 		# Valid response. Give service a few additional seconds.
-		sleep 10
+		echo "otbr-agent is ready."
+		sleep 3
 		exit 0
 	fi
 	sleep 1
