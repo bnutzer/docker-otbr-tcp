@@ -8,6 +8,17 @@ OpenThread Border Router (OTBR) requires a device file to be passed to its agent
 local socket and connect it with a remote TCP socket. However, that add-on is only usable in Home Assistant OS. This Docker image uses the same concept for
 standard Docker installations.
 
+Despite its name, the image also supports local (USB-attached) thread sticks.
+
+Using docker hub image
+======================
+The image is published to docker hub for arm64 and x86_64 architectures. You can find it
+[on docker hub as bnutzer/otbr-tcp](https://hub.docker.com/r/bnutzer/otbr-tcp).
+
+New images are built weekly. As the upstream image [openthread/otbr](https://hub.docker.com/r/openthread/otbr)
+does not provide any meaningful versioning, this image is published as "latest" as well. I cannot guarantee
+the latest tag to always provide a stable version.
+
 Building the image
 ==================
 
@@ -53,7 +64,7 @@ The only mandatory configuration variable is "RCP_HOST"; the defaults work fine 
 ## Using Docker
 
 ```bash
-docker run -e RCP_HOST=SLZB-06M.local --rm otbr-tcp
+docker run -e RCP_HOST=SLZB-06M.local -v ./otbr-data:/var/lib/thread --rm otbr-tcp
 ```
 
 ## Using Docker Compose
@@ -74,6 +85,8 @@ services:
       - /dev/net/tun
     environment:
       - RCP_HOST=SLZB-06M.local
+    volumes:
+      - ./otbr-data:/var/lib/thread
 ```
 
 Then run:
@@ -81,16 +94,14 @@ Then run:
 docker compose up -d otbr
 ```
 
-Dataset Backup and Restore
-==========================
+Dataset management
+==================
 
-Some devices (including the SMLIGHT SLZB-06M) may not stay in a Thread mesh after a service restart. To mitigate this issue, the device's dataset can be backed up regularly, allowing a restore during the startup phase.
-As of now, this behavior cannot be disabled. Use the source if you need to modify this!
+OpenThread Border Router maintains its state in files in `/var/lib/thread`. This state includes an identifier, and the dataset.
+Using a persistent volume for these data will help your router to stay in its Thread mesh.
 
-When you configured this otbr to join a network (e.g., using Home Assistant), either create a backup manually, or
-wait for the container to create its first backup.
-
-The "otbr-dataset.sh" script will also initiate the basic thread configuration if no backup is found.
+Initial early versions of this image provided a backup/restore mechanism to accomplish persistence. That was an emergency solution, and
+the `otbr-dataset.sh` script has been removed from this image.
 
 License
 =======

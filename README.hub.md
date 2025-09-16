@@ -59,7 +59,7 @@ services:
 
 - **Multi-architecture support** - Works on both x64 and ARM64 systems
 - **TCP radio support** - Connect to network-attached Thread radios
-- **Automatic dataset persistence** - Maintains Thread network configuration across restarts
+- **Setting otbr service base name** - Overriding the default otbr name
 - **Web interface** - Optional OTBR web UI for management
 - **REST API** - Full OpenThread REST API support
 - **Docker optimized** - Based on official OpenThread OTBR image
