@@ -74,7 +74,7 @@ OTBR might commonly be run on the same machine running Home Assistant. This is a
 ```yaml
 services:
   otbr:
-    image: otbr-tcp
+    image: bnutzer/otbr-tcp
     network_mode: host
     restart: unless-stopped
     privileged: true
