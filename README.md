@@ -124,6 +124,19 @@ Unfortunately, configuring otbr securely clashes with the expectations of otbr-w
 open for access from the browser and (b) running on the default port. For otbr-web to work, you need to have a `OTBR_REST_LISTEN_ADDRESS` that allows
 access from your browser, and either use the default port, or set `OTBR_WEB_PATCH_REST_PORT` to 1.
 
+ot-ctl wrapper
+==============
+
+otbr can be managed using the cli program `ot-ctl`. When using a non-default `OTBR_THREAD_IF`, that interface needs to be passed to ot-ctl.
+For simplification, this image provides a wrapper `wrap-ot-ctl` that automatically uses the configured `OTBR_THREAD_IF` value, reducing the
+risk of passing the wrong device, e.g., when multiple containers are running in parallel.
+
+Example usage:
+```bash
+docker compose exec otbr wrap-ot-ctl state
+docker compose exec otbr wrap-ot-ctl dataset active
+```
+
 License
 =======
 
