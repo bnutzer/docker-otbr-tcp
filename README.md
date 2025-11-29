@@ -54,6 +54,7 @@ OTBR in this image can be configured by setting environment variables (see below
 | backup | OTBR_BACKUP_INTERVAL | 600 | Dataset backup interval in seconds |
 | web | OTBR_WEB_ENABLE | 0 | Enable OTBR web interface by setting this value to "1" |
 | web | OTBR_WEB_PORT | 8080 | Port for web interface |
+| web | OTBR_WEB_PATCH_REST_PORT | 0 | otbr-web expects the rest api on the default port 8081. Set this to 1 if the startup script should patch otbr-web to use a different configuration. |
 | web | OTBR_WEB_LISTEN_ADDRESS | 0.0.0.0 | Local listening address for web interface |
 
 Running the image
@@ -102,6 +103,26 @@ Using a persistent volume for these data will help your router to stay in its Th
 
 Initial early versions of this image provided a backup/restore mechanism to accomplish persistence. That was an emergency solution, and
 the `otbr-dataset.sh` script has been removed from this image.
+
+Security considerations
+=======================
+
+The upstream OpenThread Border Router is a reference implementation and not originally intended to be run on production installations
+unchanged. However, the public community (we!) use it for that purpose.
+
+The otbr API is not authenticated. If any device has access to your physical network, it may be able to re-configure your thread network and
+gain access to your IoT devices, including ones that might pose security risks such as smart locks. It is strongly advisable to restrict access
+to the container, e.g., by setting the listen address to 127.0.0.1, setting up firewalls, etc.
+
+otbr-web
+========
+
+otbr-web is a very basic web app for interaction with the otbr REST API. It is even less fit for production setups, and yet, it's the best option
+we have to get an overview of our installations.
+
+Unfortunately, configuring otbr securely clashes with the expectations of otbr-web. The web interface normally expects the REST interface to be (a)
+open for access from the browser and (b) running on the default port. For otbr-web to work, you need to have a `OTBR_REST_LISTEN_ADDRESS` that allows
+access from your browser, and either use the default port, or set `OTBR_WEB_PATCH_REST_PORT` to 1.
 
 License
 =======

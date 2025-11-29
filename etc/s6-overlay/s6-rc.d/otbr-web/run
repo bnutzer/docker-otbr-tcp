@@ -7,6 +7,10 @@ if [[ "${OTBR_WEB_ENABLE}" -eq "0" ]] ; then
 	exec sleep infinity
 fi
 
+if [[ "${OTBR_WEB_PATCH_REST_PORT}" -ge "1" ]] ; then
+	sed -i "s/'8081'/'${OTBR_REST_LISTEN_PORT}'/" /usr/share/otbr-web/frontend/res/js/app.js
+fi
+
 exec /usr/sbin/otbr-web \
 	-I "${OTBR_THREAD_IF}" \
 	-d${OTBR_LOG_LEVEL_INT} \
