@@ -2,12 +2,15 @@
 
 set -eu
 
-for i in $(seq 1 180); do
+timeout=180
+elapsed=0
+while [[ $elapsed -lt $timeout ]]; do
 	if wrap-ot-ctl state >/dev/null 2>&1; then
 		echo "otbr-agent is ready."
 		exit 0
 	fi
 	sleep 1
+	elapsed=$((elapsed + 1))
 done
-echo "otbr-agent-ready: ot-ctl never responded, startup failed." >&2
+echo "otbr-agent-ready: ot-ctl never responded after ${timeout}s, startup failed." >&2
 exit 1

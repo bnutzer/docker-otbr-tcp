@@ -1,0 +1,8 @@
+.git
+.github
+.gitignore
+.dockerignore
+README.md
+README.hub.md
+LICENSE
+build-and-push.sh
