@@ -8,11 +8,13 @@ if [[ $RCP_USE_TCP -gt 0 ]] ; then
 	echo "Proceeding."
 fi
 
+OTBR_REST_LISTEN_ADDRESS="${OTBR_REST_LISTEN_ADDRESS:-${OTBR_REST_LISTEN_ADRESS:-0.0.0.0}}"
+
 echo "Starting otbr-agent ..."
 
-exec 
+exec \
     "/usr/sbin/otbr-agent" -I ${OTBR_THREAD_IF} -B "${OTBR_BACKBONE_IF}" \
-        --rest-listen-address "${OTBR_REST_LISTEN_ADRESS}" \
+        --rest-listen-address "${OTBR_REST_LISTEN_ADDRESS}" \
         --rest-listen-port "${OTBR_REST_LISTEN_PORT}" \
         -d${OTBR_LOG_LEVEL_INT} -v -s \
         "spinel+hdlc+uart://${RCP_TTY:-/tmp/ttyOTBR}?uart-baudrate=${RCP_BAUDRATE:-460800}${OTBR_RCP_ADDITIONAL_ARGS:-}" \

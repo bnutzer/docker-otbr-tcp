@@ -44,7 +44,9 @@ ENV RCP_BAUDRATE="460800"
 ENV SOCAT_SOURCE_PARAMETERS=",raw,echo=0,wait-slave,ignoreeof"
 ENV SOCAT_DESTINATION_PARAMETERS=",nodelay,keepalive,forever,interval=5"
 
-ENV OTBR_REST_LISTEN_ADRESS="0.0.0.0"
+# OTBR_REST_LISTEN_ADDRESS defaults to 0.0.0.0 in the otbr-agent run script.
+# No ENV default here so the script can detect explicit user overrides and
+# fall back to the legacy misspelled OTBR_REST_LISTEN_ADRESS if set.
 ENV OTBR_REST_LISTEN_PORT="8081"
 ENV OTBR_THREAD_IF="wpan0"
 ENV OTBR_BACKBONE_IF="eth0"
