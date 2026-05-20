@@ -15,6 +15,5 @@ fi
 echo "Starting socat ..."
 
 exec /usr/bin/socat -d -d \
-  -ly -lf /var/log/socat-otrcp.log \
   pty,link=${RCP_TTY}${SOCAT_SOURCE_PARAMETERS} \
   tcp:${RCP_HOST}:${RCP_PORT}${SOCAT_DESTINATION_PARAMETERS}
