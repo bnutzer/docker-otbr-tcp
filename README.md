@@ -51,7 +51,6 @@ OTBR in this image can be configured by setting environment variables (see below
 | agent | OTBR_BACKBONE_IF | eth0 | Local network device |
 | agent | OTBR_RCP_ADDITIONAL_ARGS | &uart-flow-control | RCP arguments to pass to OTBR. Default enables flow control |
 | agent | OTBR_SERVICEBASENAME | | Set service base name of router. Defaults to "OpenThread BR (unspecified vendor)" and will be appended an identifier |
-| backup | OTBR_BACKUP_INTERVAL | 600 | Dataset backup interval in seconds |
 | web | OTBR_WEB_ENABLE | 0 | Enable OTBR web interface by setting this value to "1" |
 | web | OTBR_WEB_PORT | 8080 | Port for web interface |
 | web | OTBR_WEB_PATCH_REST_PORT | 0 | otbr-web expects the rest api on the default port 8081. Set this to 1 if the startup script should patch otbr-web to use a different configuration. |
@@ -100,9 +99,6 @@ Dataset management
 
 OpenThread Border Router maintains its state in files in `/var/lib/thread`. This state includes an identifier, and the dataset.
 Using a persistent volume for these data will help your router to stay in its Thread mesh.
-
-Initial early versions of this image provided a backup/restore mechanism to accomplish persistence. That was an emergency solution, and
-the `otbr-dataset.sh` script has been removed from this image.
 
 Security considerations
 =======================
