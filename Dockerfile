@@ -2,6 +2,12 @@ FROM openthread/otbr:latest
 # Openthread provides two images: otbr, and border-router. Both include the
 # "otbr-agent", but only otbr has the "otbr-web".
 
+LABEL org.opencontainers.image.title="OTBR TCP"
+LABEL org.opencontainers.image.description="OpenThread Border Router with remote TCP RCP support"
+LABEL org.opencontainers.image.source="https://github.com/bnutzer/docker-otbr-tcp"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.base.name="openthread/otbr"
+
 ARG S6_OVERLAY_VERSION=3.2.1.0
 
 RUN apt-get update \
