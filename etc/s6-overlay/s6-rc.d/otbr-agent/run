@@ -14,6 +14,8 @@ echo "Starting otbr-agent ..."
 
 exec \
     "/usr/sbin/otbr-agent" -I ${OTBR_THREAD_IF} -B "${OTBR_BACKBONE_IF}" \
+        --vendor-name "${OTBR_VENDOR_NAME}" \
+        --model-name "${OTBR_MODEL_NAME}" \
         --rest-listen-address "${OTBR_REST_LISTEN_ADDRESS}" \
         --rest-listen-port "${OTBR_REST_LISTEN_PORT}" \
         -d${OTBR_LOG_LEVEL_INT} -v -s \

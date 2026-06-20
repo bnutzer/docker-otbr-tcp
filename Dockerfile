@@ -24,6 +24,9 @@ RUN rm -rf /etc/s6-overlay/s6-rc.d
 COPY etc /etc
 COPY usr /usr
 
+ENV OTBR_VENDOR_NAME="OpenThread Border Router"
+ENV OTBR_MODEL_NAME="docker-otbr-tcp"
+
 ENV OTBR_LOG_LEVEL_INT="6"
 
 ENV RCP_USE_TCP="1"
@@ -41,7 +44,6 @@ ENV OTBR_REST_LISTEN_PORT="8081"
 ENV OTBR_THREAD_IF="wpan0"
 ENV OTBR_BACKBONE_IF="eth0"
 ENV OTBR_RCP_ADDITIONAL_ARGS=&uart-flow-control
-
 
 ENV OTBR_WEB_ENABLE="0"
 ENV OTBR_WEB_PORT="8080"
