@@ -1,41 +1,25 @@
-FROM openthread/otbr:latest
-# Openthread provides two images: otbr, and border-router. Both include the
-# "otbr-agent", but only otbr has the "otbr-web".
+FROM openthread/border-router:latest
+# Older versions of this project were based on openthread/otbr. However, that
+# image is targeted towards test environments.
+# Starting ~ 2026-05-20, this image will be based on openthread/border-router,
+# the production image: Ubuntu 24.04, slim, built with OTBR_DBUS=OFF.
 
 LABEL org.opencontainers.image.title="OTBR TCP"
 LABEL org.opencontainers.image.description="OpenThread Border Router with remote TCP RCP support"
 LABEL org.opencontainers.image.source="https://github.com/bnutzer/docker-otbr-tcp"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.base.name="openthread/otbr"
-
-ARG S6_OVERLAY_VERSION=3.2.1.0
+LABEL org.opencontainers.image.base.name="openthread/border-router"
 
 RUN apt-get update \
 	&& apt-get upgrade -y \
-	&& apt-get install --no-install-recommends -y socat xz-utils curl ca-certificates lsof vim strace \
+	&& apt-get install --no-install-recommends -y socat lsof vim strace \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN set -eux; \
-	if [ -z "${TARGETARCH:-}" ]; then \
-		if command -v dpkg >/dev/null 2>&1; then \
-			TARGETARCH="$(dpkg --print-architecture)"; \
-		else \
-			TARGETARCH="$(uname -m)"; \
-		fi; \
-	fi; \
-	case "${TARGETARCH}" in \
-		amd64)  S6_ARCH=x86_64 ;; \
-		arm64)  S6_ARCH=aarch64 ;; \
-		*) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
-	esac; \
-	curl -fsSL -o /tmp/s6-noarch.tar.xz  "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz"; \
-	curl -fsSL -o /tmp/s6-arch.tar.xz    "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}.tar.xz"; \
-	tar -C / -Jxpf /tmp/s6-noarch.tar.xz; \
-	tar -C / -Jxpf /tmp/s6-arch.tar.xz; \
-	rm -f /tmp/s6-*.tar.xz
-
-ENV PATH=${PATH}:/command
+# Wipe upstream's s6-rc service tree wholesale so our COPY below is the only
+# authoritative source. Our tree provides the user/user2 bundle markers that
+# s6-overlay's top bundle requires.
+RUN rm -rf /etc/s6-overlay/s6-rc.d
 
 COPY etc /etc
 COPY usr /usr
