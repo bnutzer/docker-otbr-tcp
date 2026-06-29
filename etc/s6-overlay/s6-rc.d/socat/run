@@ -7,7 +7,9 @@ set -eu
 # instead of letting them collide with otbr-agent's output in docker logs.
 exec 2>&1
 
-if [[ "${RCP_USE_TCP}" -eq "0" ]] ; then
+. /usr/local/lib/otbr/booleans.sh
+
+if ! otbr_is_true "${RCP_USE_TCP:-}" ; then
 	echo "RCP over tcp (socat) disabled."
 	exec sleep infinity
 fi

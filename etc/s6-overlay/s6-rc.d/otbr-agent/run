@@ -6,7 +6,9 @@ set -eu
 # logger service (see producer-for) captures it as whole, atomic lines.
 exec 2>&1
 
-if [[ $RCP_USE_TCP -gt 0 ]] ; then
+. /usr/local/lib/otbr/booleans.sh
+
+if otbr_is_true "${RCP_USE_TCP:-}" ; then
 	echo -n "Sleeping for ${SOCAT_STARTUP_GRACE_PERIOD}s to give socat time to come up ... "
 	sleep "${SOCAT_STARTUP_GRACE_PERIOD}"
 	echo "Proceeding."

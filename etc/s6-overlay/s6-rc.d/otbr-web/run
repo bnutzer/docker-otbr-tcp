@@ -6,7 +6,9 @@ set -eu
 # service (see producer-for) captures it as whole, atomic lines.
 exec 2>&1
 
-if [[ "${OTBR_WEB_ENABLE}" -eq "0" ]] ; then
+. /usr/local/lib/otbr/booleans.sh
+
+if ! otbr_is_true "${OTBR_WEB_ENABLE:-}" ; then
 	echo "otbr-web disabled."
 	exec sleep infinity
 fi
