@@ -7,16 +7,27 @@
 # s6-supervise would silently restart otbr-agent forever even when the radio
 # link or configuration is broken.
 
+sig=0
 if test "$1" -eq 256 ; then
+	sig="$2"
 	e=$((128 + $2))
+	echo "otbr-agent was killed by signal ${sig}."
 else
 	e="$1"
+	echo "otbr-agent exited with code ${e}."
 fi
 
-echo "otbr-agent exited with code ${1} (by signal ${2})."
+# SIGTERM (15) and SIGINT (2) are the orderly-shutdown signals: `docker stop`
+# sends SIGTERM, and `s6-svc -d` / Ctrl-C use them too. Treat these as an
+# intentional stop -- let s6's down state govern restart and let the container
+# exit cleanly -- instead of misreporting a deliberate shutdown as a crash and
+# recording a 143/130 exit code.
+if test "$sig" -eq 15 || test "$sig" -eq 2 ; then
+	exit 0
+fi
 
 # Exit code 5 is the upstream convention for "shut down on purpose, don't
-# treat as fatal" -- mirror it so an operator can `s6-svc -d` cleanly.
+# treat as fatal" -- mirror it so an operator can stop the agent cleanly.
 if test "$e" -ne 0 && test "$e" -ne 5; then
 	echo "$e" > /run/s6-linux-init-container-results/exitcode
 	/run/s6/basedir/bin/halt
