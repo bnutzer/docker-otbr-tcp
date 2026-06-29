@@ -12,7 +12,7 @@ LABEL org.opencontainers.image.base.name="openthread/border-router"
 
 RUN apt-get update \
 	&& apt-get upgrade -y \
-	&& apt-get install --no-install-recommends -y socat lsof vim strace \
+	&& apt-get install --no-install-recommends -y socat \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
