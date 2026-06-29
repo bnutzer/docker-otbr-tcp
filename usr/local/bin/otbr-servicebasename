@@ -1,10 +1,17 @@
 #!/command/with-contenv bash
 
-exec &>/var/log/servicebasename
+set -uo pipefail
 
 if [[ -z "${OTBR_SERVICEBASENAME:-}" ]] ; then
 	exit 0
 fi
 
-echo "Updating service basename to '${OTBR_SERVICEBASENAME}' ..."
-wrap-ot-ctl ba servicebasename "${OTBR_SERVICEBASENAME}"
+# Mirror output to both the container log (docker logs) and a file, so a
+# failed `wrap-ot-ctl ba servicebasename` is visible instead of being silently
+# swallowed into a file nobody looks at. tee runs in the foreground of the
+# pipe, so it flushes before this oneshot exits (unlike a process
+# substitution, which can be reaped before its buffer is written).
+{
+	echo "Updating service basename to '${OTBR_SERVICEBASENAME}' ..."
+	wrap-ot-ctl ba servicebasename "${OTBR_SERVICEBASENAME}"
+} 2>&1 | tee /var/log/servicebasename
