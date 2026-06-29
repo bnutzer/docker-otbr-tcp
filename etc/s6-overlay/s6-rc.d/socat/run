@@ -22,5 +22,5 @@ fi
 echo "Starting socat ..."
 
 exec /usr/bin/socat -d \
-  pty,link=${RCP_TTY}${SOCAT_SOURCE_PARAMETERS} \
-  tcp:${RCP_HOST}:${RCP_PORT}${SOCAT_DESTINATION_PARAMETERS}
+  "pty,link=${RCP_TTY}${SOCAT_SOURCE_PARAMETERS}" \
+  "tcp:${RCP_HOST}:${RCP_PORT}${SOCAT_DESTINATION_PARAMETERS}"

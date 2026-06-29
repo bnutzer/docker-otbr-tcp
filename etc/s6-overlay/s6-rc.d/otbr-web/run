@@ -17,7 +17,7 @@ fi
 # queries the right one. Replaces the old hack of sed-patching app.js.
 exec /usr/sbin/otbr-web \
 	-I "${OTBR_THREAD_IF}" \
-	-d${OTBR_LOG_LEVEL_INT} \
+	"-d${OTBR_LOG_LEVEL_INT}" \
 	-s \
 	-p "${OTBR_WEB_PORT}" \
 	-a "${OTBR_WEB_LISTEN_ADDRESS}" \

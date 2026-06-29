@@ -19,11 +19,11 @@ OTBR_REST_LISTEN_ADDRESS="${OTBR_REST_LISTEN_ADDRESS:-${OTBR_REST_LISTEN_ADRESS:
 echo "Starting otbr-agent ..."
 
 exec \
-    "/usr/sbin/otbr-agent" -I ${OTBR_THREAD_IF} -B "${OTBR_BACKBONE_IF}" \
+    "/usr/sbin/otbr-agent" -I "${OTBR_THREAD_IF}" -B "${OTBR_BACKBONE_IF}" \
         --vendor-name "${OTBR_VENDOR_NAME}" \
         --model-name "${OTBR_MODEL_NAME}" \
         --rest-listen-address "${OTBR_REST_LISTEN_ADDRESS}" \
         --rest-listen-port "${OTBR_REST_LISTEN_PORT}" \
-        -d${OTBR_LOG_LEVEL_INT} -v -s \
+        "-d${OTBR_LOG_LEVEL_INT}" -v -s \
         "spinel+hdlc+uart://${RCP_TTY:-/tmp/ttyOTBR}?uart-baudrate=${RCP_BAUDRATE:-460800}${OTBR_RCP_ADDITIONAL_ARGS:-}" \
         "trel://${OTBR_BACKBONE_IF}"
