@@ -2,6 +2,10 @@
 
 set -eu
 
+# otbr-web logs to stderr; fold it into stdout so the otbr-web-log logger
+# service (see producer-for) captures it as whole, atomic lines.
+exec 2>&1
+
 if [[ "${OTBR_WEB_ENABLE}" -eq "0" ]] ; then
 	echo "otbr-web disabled."
 	exec sleep infinity

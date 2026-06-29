@@ -1,0 +1,4 @@
+#!/command/with-contenv sh
+# Consume otbr-web's piped output and re-emit each line atomically to the
+# container stdout (docker logs), prefixed with an ISO 8601 UTC timestamp.
+exec /command/s6-log -- T 1
