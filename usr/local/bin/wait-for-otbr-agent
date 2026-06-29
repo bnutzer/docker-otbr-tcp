@@ -2,12 +2,12 @@
 
 set -eu
 
-for i in $(seq 1 180); do
+for i in $(seq 1 35); do
 	if wrap-ot-ctl state >/dev/null 2>&1; then
 		echo "otbr-agent is ready."
 		exit 0
 	fi
 	sleep 1
 done
-echo "otbr-agent-ready: ot-ctl never responded, startup failed." >&2
+echo "otbr-agent-ready: ot-ctl never responded within 35s, startup failed." >&2
 exit 1

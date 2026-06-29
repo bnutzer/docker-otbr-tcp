@@ -49,7 +49,10 @@ ENV OTBR_WEB_ENABLE="0"
 ENV OTBR_WEB_PORT="8080"
 ENV OTBR_WEB_LISTEN_ADDRESS="0.0.0.0"
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+# start-period covers the worst-case readiness path (socat <=20s + agent grace
+# + otbr-agent <=35s, ~60s total). After that, three failed 15s probes mark the
+# container unhealthy so a wedged radio link is surfaced quickly.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
 	CMD wrap-ot-ctl state >/dev/null 2>&1
 
 ENTRYPOINT ["/init"]

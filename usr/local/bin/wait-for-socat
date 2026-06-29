@@ -8,11 +8,11 @@ if ! otbr_is_true "${RCP_USE_TCP:-}" ; then
 	exit 0
 fi
 
-for i in $(seq 1 120); do
+for i in $(seq 1 20); do
   if [[ -e "$RCP_TTY" ]] && [[ -r "$RCP_TTY" ]]; then
     exit 0
   fi
   sleep 1
 done
-echo "socat-ready: TTY $RCP_TTY NOT ready" >&2
+echo "socat-ready: TTY $RCP_TTY NOT ready within 20s" >&2
 exit 1
