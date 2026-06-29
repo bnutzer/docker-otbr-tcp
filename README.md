@@ -65,7 +65,11 @@ The only mandatory configuration variable is "RCP_HOST"; the defaults work fine 
 ## Using Docker
 
 ```bash
-docker run -e RCP_HOST=SLZB-06M.local -v ./otbr-data:/var/lib/thread --rm otbr-tcp
+docker run --network host \
+  --cap-add NET_ADMIN --cap-add NET_RAW \
+  --device /dev/net/tun \
+  -e RCP_HOST=SLZB-06M.local \
+  -v ./otbr-data:/var/lib/thread --rm otbr-tcp
 ```
 
 ## Using Docker Compose
@@ -78,10 +82,13 @@ services:
     image: bnutzer/otbr-tcp
     network_mode: host
     restart: unless-stopped
-    privileged: true
-    cap_drop:
-      - NET_ADMIN   # Should prevent iptables/ipset updates
-      - NET_RAW     # No raw network access
+    # OTBR needs NET_ADMIN (to create/configure wpan0, set routes and
+    # ip6tables) and NET_RAW. Granting just these two keeps the container far
+    # more contained than `privileged: true`, which would hand over the full
+    # capability set and disable the seccomp/AppArmor profiles.
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     devices:
       - /dev/net/tun
     environment:
@@ -94,6 +101,15 @@ Then run:
 ```bash
 docker compose up -d otbr
 ```
+
+> **Capabilities, not `privileged`:** Older examples used `privileged: true`.
+> That works but is unnecessarily broad — it grants every capability and turns
+> off seccomp/AppArmor. Note that combining `privileged: true` with `cap_drop`
+> does **not** restrict anything: Docker ignores `cap_drop` for privileged
+> containers, so a dropped `NET_ADMIN` is still fully present. Prefer the
+> explicit `cap_add` above. Because `network_mode: host` shares the host's
+> network namespace, IPv6 forwarding is governed by the **host** sysctls
+> (e.g. `net.ipv6.conf.all.forwarding`), not by per-container settings.
 
 Dataset management
 ==================
@@ -110,6 +126,10 @@ unchanged. However, the public community (we!) use it for that purpose.
 The otbr API is not authenticated. If any device has access to your physical network, it may be able to re-configure your thread network and
 gain access to your IoT devices, including ones that might pose security risks such as smart locks. It is strongly advisable to restrict access
 to the container, e.g., by setting the listen address to 127.0.0.1, setting up firewalls, etc.
+
+Run the container with the least privilege it needs: grant `NET_ADMIN` and `NET_RAW` (plus the `/dev/net/tun` device) rather than `privileged: true`. The
+latter grants the full capability set and disables seccomp/AppArmor, and — contrary to a common misconception — a `cap_drop` alongside `privileged: true` is
+silently ignored by Docker, so it provides no protection.
 
 otbr-web
 ========

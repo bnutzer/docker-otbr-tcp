@@ -24,7 +24,8 @@ All images support both `linux/amd64` and `linux/arm64` architectures.
 docker run -d \
   --name otbr \
   --network host \
-  --privileged \
+  --cap-add NET_ADMIN \
+  --cap-add NET_RAW \
   --device /dev/net/tun \
   -e RCP_HOST=SLZB-06M.local \
   bnutzer/otbr-tcp
@@ -38,7 +39,9 @@ services:
     container_name: otbr
     network_mode: host
     restart: unless-stopped
-    privileged: true
+    cap_add:
+      - NET_ADMIN   # configure wpan0, routes, ip6tables
+      - NET_RAW
     devices:
       - /dev/net/tun
     environment:
