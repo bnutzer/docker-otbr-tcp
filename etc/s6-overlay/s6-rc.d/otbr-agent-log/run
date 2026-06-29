@@ -1,0 +1,6 @@
+#!/command/with-contenv sh
+# Consume otbr-agent's piped output and re-emit each line atomically to the
+# container stdout (docker logs), prefixed with an ISO 8601 UTC timestamp.
+# Atomic per-line writes are what stop otbr-agent and socat from garbling
+# each other's lines in the shared log stream.
+exec /command/s6-log -- T 1

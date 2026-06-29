@@ -2,6 +2,11 @@
 
 set -eu
 
+# socat's diagnostics go to stderr; fold them into stdout so the socat-log
+# logger service (see producer-for) captures them as whole, atomic lines
+# instead of letting them collide with otbr-agent's output in docker logs.
+exec 2>&1
+
 if [[ "${RCP_USE_TCP}" -eq "0" ]] ; then
 	echo "RCP over tcp (socat) disabled."
 	exec sleep infinity
