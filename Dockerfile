@@ -48,7 +48,6 @@ ENV OTBR_RCP_ADDITIONAL_ARGS=&uart-flow-control
 ENV OTBR_WEB_ENABLE="0"
 ENV OTBR_WEB_PORT="8080"
 ENV OTBR_WEB_LISTEN_ADDRESS="0.0.0.0"
-ENV OTBR_WEB_PATCH_REST_PORT="0"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
 	CMD wrap-ot-ctl state >/dev/null 2>&1

@@ -11,13 +11,12 @@ if [[ "${OTBR_WEB_ENABLE}" -eq "0" ]] ; then
 	exec sleep infinity
 fi
 
-if [[ "${OTBR_WEB_PATCH_REST_PORT}" -ge "1" ]] ; then
-	sed -i "s/'8081'/'${OTBR_REST_LISTEN_PORT}'/" /usr/share/otbr-web/frontend/res/js/app.js
-fi
-
+# Tell otbr-web which port the REST API listens on (-P) so its frontend
+# queries the right one. Replaces the old hack of sed-patching app.js.
 exec /usr/sbin/otbr-web \
 	-I "${OTBR_THREAD_IF}" \
 	-d${OTBR_LOG_LEVEL_INT} \
 	-s \
 	-p "${OTBR_WEB_PORT}" \
-	-a "${OTBR_WEB_LISTEN_ADDRESS}"
+	-a "${OTBR_WEB_LISTEN_ADDRESS}" \
+	-P "${OTBR_REST_LISTEN_PORT}"

@@ -55,7 +55,6 @@ OTBR in this image can be configured by setting environment variables (see below
 | agent | OTBR_SERVICEBASENAME | | Set service base name of router. Defaults to "OpenThread BR (unspecified vendor)" and will be appended an identifier |
 | web | OTBR_WEB_ENABLE | 0 | Enable OTBR web interface by setting this value to "1" |
 | web | OTBR_WEB_PORT | 8080 | Port for web interface |
-| web | OTBR_WEB_PATCH_REST_PORT | 0 | otbr-web expects the rest api on the default port 8081. Set this to 1 if the startup script should patch otbr-web to use a different configuration. |
 | web | OTBR_WEB_LISTEN_ADDRESS | 0.0.0.0 | Local listening address for web interface |
 
 Running the image
@@ -118,9 +117,13 @@ otbr-web
 otbr-web is a very basic web app for interaction with the otbr REST API. It is even less fit for production setups, and yet, it's the best option
 we have to get an overview of our installations.
 
-Unfortunately, configuring otbr securely clashes with the expectations of otbr-web. The web interface normally expects the REST interface to be (a)
-open for access from the browser and (b) running on the default port. For otbr-web to work, you need to have a `OTBR_REST_LISTEN_ADDRESS` that allows
-access from your browser, and either use the default port, or set `OTBR_WEB_PATCH_REST_PORT` to 1.
+Unfortunately, configuring otbr securely clashes with the expectations of otbr-web. The web interface normally expects the REST interface to be open
+for access from the browser. For otbr-web to work, you need to have a `OTBR_REST_LISTEN_ADDRESS` that allows access from your browser. A non-default
+`OTBR_REST_LISTEN_PORT` is handled automatically: the start script passes it to otbr-web via `-P`, so no source patching is required.
+
+> **Caveat:** The web UI's JavaScript runs in *your browser* and queries the REST API directly. The REST address and port (`OTBR_REST_LISTEN_ADDRESS`
+> / `OTBR_REST_LISTEN_PORT`) must therefore be reachable from the browser's network, not just from inside the container or the Docker host. A REST
+> interface bound to a loopback or internal-only address will leave the web UI unable to load data, even though otbr-web itself starts fine.
 
 ot-ctl wrapper
 ==============
