@@ -45,7 +45,7 @@ OTBR in this image can be configured by setting environment variables (see below
 | rcp | SOCAT_DESTINATION_PARAMETERS | ,nodelay,keepalive,forever,interval=5 | Additional arguments to the remote socket configuration for socat |
 | agent | RCP_BAUDRATE | 460800 | Communication baud rate for the radio. The default is the maximum; reduce by factors of 2 or 4 for increased stability |
 | agent | SOCAT_STARTUP_GRACE_PERIOD | 2 | Additional wait time to allow socat to contact the radio |
-| agent | OTBR_REST_LISTEN_ADDRESS | 0.0.0.0 | Local address for OTBR REST interface. 0.0.0.0 is public. IPv6 options not yet explored |
+| agent | OTBR_REST_LISTEN_ADDRESS | 0.0.0.0 | Local address for OTBR REST interface. The default is public (unauthenticated API!) — see [Security considerations](#security-considerations) for choosing this by topology. IPv6 options not yet explored |
 | agent | OTBR_REST_LISTEN_PORT | 8081 | Port of OTBR REST interface |
 | agent, web | OTBR_THREAD_IF | wpan0 | TUN device created and used by OTBR. Set to a different device for running multiple instances |
 | agent | OTBR_BACKBONE_IF | eth0 | Local network device |
@@ -123,9 +123,20 @@ Security considerations
 The upstream OpenThread Border Router is a reference implementation and not originally intended to be run on production installations
 unchanged. However, the public community (we!) use it for that purpose.
 
-The otbr API is not authenticated. If any device has access to your physical network, it may be able to re-configure your thread network and
-gain access to your IoT devices, including ones that might pose security risks such as smart locks. It is strongly advisable to restrict access
-to the container, e.g., by setting the listen address to 127.0.0.1, setting up firewalls, etc.
+The otbr REST API (and the optional web UI) is **not authenticated**. Anyone who can reach the listen address can re-configure your Thread network and
+reach your IoT devices — including security-sensitive ones such as smart locks. The right `OTBR_REST_LISTEN_ADDRESS` depends on where the consuming
+controller (Home Assistant, ioBroker, …) runs *relative to this container*. Because the image uses `network_mode: host`, it binds the **host's**
+addresses, so "same host" does not automatically mean loopback is enough:
+
+| Where the consumer runs | Recommended `OTBR_REST_LISTEN_ADDRESS` |
+|---|---|
+| Same host, sharing the host network namespace (HA Core/Supervised on the host, or a container with `network_mode: host`) | `127.0.0.1` — not reachable off-box, safest |
+| Same host but in a **bridge** network (e.g. a plain `docker compose` Home Assistant) | the host's **LAN IP** — the container's loopback is a different namespace and is not reachable |
+| A **different host**, or you use **otbr-web** from a remote browser | the host's **LAN IP** (or `0.0.0.0`) **plus** a firewall restricting access to the controller host, and/or an isolated IoT VLAN |
+
+Prefer binding a **specific** LAN IP over the `0.0.0.0` wildcard, so the API is only offered on the interface you actually intend. The image default is
+`0.0.0.0` so it works out of the box in every topology — but that exposes the unauthenticated API to every network the host can reach, which is only
+acceptable on a trusted/isolated network. Whenever the API leaves loopback, treat firewalling or VLAN isolation as mandatory, not optional.
 
 Run the container with the least privilege it needs: grant `NET_ADMIN` and `NET_RAW` (plus the `/dev/net/tun` device) rather than `privileged: true`. The
 latter grants the full capability set and disables seccomp/AppArmor, and — contrary to a common misconception — a `cap_drop` alongside `privileged: true` is
