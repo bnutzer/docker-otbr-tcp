@@ -16,6 +16,15 @@ RUN apt-get update \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
+# The border-router base image (unlike the older otbr base) omits /command
+# from PATH. Our scripts use the #!/command/with-contenv shebang, and
+# with-contenv is itself an execline script whose first op is `ifelse` --
+# execlineb resolves that (and s6-envdir, eltest, ...) from /command via PATH.
+# Supervised services get /command on PATH from s6 at boot, but manual and
+# out-of-tree invocations (interactive `wrap-ot-ctl`, the HEALTHCHECK) inherit
+# Docker's bare PATH and fail with "unable to exec ifelse". Restore /command.
+ENV PATH="$PATH:/command"
+
 # Wipe upstream's s6-rc service tree wholesale so our COPY below is the only
 # authoritative source. Our tree provides the user/user2 bundle markers that
 # s6-overlay's top bundle requires.
