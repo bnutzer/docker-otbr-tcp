@@ -4,14 +4,13 @@ on:
   # Manual trigger
   workflow_dispatch:
 
-  # Weekly builds every Monday at 6 AM UTC
-  schedule:
-    - cron: '0 6 * * 1'
+  # v1 is legacy: no weekly rebuilds. GitHub only runs scheduled workflows
+  # from the default branch (main = v2) anyway.
 
-  # Build on pushes to main branch
+  # Build on pushes to the v1 branch
   push:
     branches:
-      - main
+      - v1
       - 'build-*'
     paths-ignore:
       - 'README*.md'
@@ -56,12 +55,16 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME }}
+          # v1 is not the default branch, so is_default_branch cannot gate
+          # the moving tags; check the ref explicitly (build-* branches only
+          # get the immutable sha/build tags). Never emit latest from here.
+          flavor: |
+            latest=false
           tags: |
-            type=sha,format=short
-            type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,value={{date 'YYYYMMDD'}},enable={{is_default_branch}}
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=build-${{ github.run_number }}
+            type=sha,format=short,prefix=v1-sha-
+            type=raw,value=v1-build-${{ github.run_number }}
+            type=raw,value=v1-{{date 'YYYYMMDD'}},enable=${{ github.ref == 'refs/heads/v1' }}
+            type=raw,value=v1,enable=${{ github.ref == 'refs/heads/v1' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
