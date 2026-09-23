@@ -10,14 +10,29 @@ standard Docker installations.
 
 Despite its name, the image also supports local (USB-attached) thread sticks.
 
+> **This is the legacy v1 branch.** v1 is based on [openthread/otbr](https://hub.docker.com/r/openthread/otbr), an
+> upstream image targeted at test environments. Active development has moved to v2 (based on
+> [openthread/border-router](https://hub.docker.com/r/openthread/border-router)) on the
+> [`main` branch](https://github.com/bnutzer/docker-otbr-tcp/tree/main). v1 is no longer rebuilt weekly and receives
+> no new features. New installations should use v2.
+
 Using docker hub image
 ======================
 The image is published to docker hub for arm64 and x86_64 architectures. You can find it
 [on docker hub as bnutzer/otbr-tcp](https://hub.docker.com/r/bnutzer/otbr-tcp).
 
-New images are built weekly. As the upstream image [openthread/otbr](https://hub.docker.com/r/openthread/otbr)
-does not provide any meaningful versioning, this image is published as "latest" as well. I cannot guarantee
-the latest tag to always provide a stable version.
+**`latest` now points to v2.** To keep running v1, pin one of the v1 tags:
+
+| Tag | Meaning |
+|-----|---------|
+| `v1` | Most recent v1 build (moving) |
+| `v1-YYYYMMDD` | v1 build of that day |
+| `v1-sha-<sha>` | v1 build of that git commit |
+| `v1-build-<nr>` | v1 build of that CI run |
+
+Older v1 images, built while v1 was the default, are still available under their original unprefixed
+tags (`YYYYMMDD` up to and including `20260921`, `build-<nr>` up to `build-67`). Unprefixed date tags from
+the v2 cutover onwards are v2 images.
 
 Building the image
 ==================
