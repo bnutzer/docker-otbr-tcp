@@ -15,9 +15,25 @@ Using docker hub image
 The image is published to docker hub for arm64 and x86_64 architectures. You can find it
 [on docker hub as bnutzer/otbr-tcp](https://hub.docker.com/r/bnutzer/otbr-tcp).
 
-New images are built weekly. As the upstream image [openthread/otbr](https://hub.docker.com/r/openthread/otbr)
-does not provide any meaningful versioning, this image is published as "latest" as well. I cannot guarantee
-the latest tag to always provide a stable version.
+There are two image series. **v2** (this branch, `main`) is current and is based on
+[openthread/border-router](https://hub.docker.com/r/openthread/border-router). **v1** is legacy; see
+[Image versions](#image-versions) below.
+
+New v2 images are built on every push to `main` and weekly. As the upstream image does not provide any meaningful
+versioning, the moving tags track upstream's `latest`. I cannot guarantee these to always provide a stable version;
+pin a date tag if you need reproducibility.
+
+| Tag | Series | Meaning |
+|-----|--------|---------|
+| `latest`, `v2` | v2 | Most recent v2 build (moving) |
+| `v2-YYYYMMDD` | v2 | v2 build of that day |
+| `YYYYMMDD` | v2 | Same as `v2-YYYYMMDD` for dates from the v2 cutover onwards; earlier dates are v1 images |
+| `v2-sha-<sha>`, `sha-<sha>` | v2 | v2 build of that git commit |
+| `v2-build-<nr>` | v2 | v2 build of that CI run |
+| `v1` | v1 (legacy) | Most recent v1 build (moving) |
+| `v1-YYYYMMDD`, `v1-sha-<sha>`, `v1-build-<nr>` | v1 (legacy) | Pinned v1 builds |
+
+Prefer the `v2`/`v2-*` tags over `latest`/`YYYYMMDD` if you want a future major version to be an explicit opt-in.
 
 Building the image
 ==================
@@ -168,6 +184,33 @@ Example usage:
 docker compose exec otbr wrap-ot-ctl state
 docker compose exec otbr wrap-ot-ctl dataset active
 ```
+
+Image versions
+==============
+
+## Version 2 (current, branch `main`)
+
+Version 2 migrates the base image from the legacy [openthread/otbr](https://hub.docker.com/r/openthread/otbr), which
+upstream targets at test environments, to the production image
+[openthread/border-router](https://hub.docker.com/r/openthread/border-router) (Ubuntu 24.04, slim, built without D-Bus).
+It ships a more recent OpenThread build, and the service tree inside the image has been reworked.
+
+## Version 1 (legacy, branch `v1`)
+
+Version 1 is based on openthread/otbr. It remains available via the `v1` and `v1-*` tags, but receives no new
+features and is no longer rebuilt weekly. Its source lives on the
+[`v1` branch](https://github.com/bnutzer/docker-otbr-tcp/tree/v1). Images built while v1 was the default series are
+still available under their original tags (`YYYYMMDD` up to and including `20260921`, `build-<nr>` up to `build-67`).
+
+## Migrating from v1
+
+`latest` used to be v1 and is now v2. If you pull `latest` (or run an automatic updater), you get v2 on your next
+update. To stay on v1 for now, pin `bnutzer/otbr-tcp:v1`. When moving to v2:
+
+- `OTBR_WEB_PATCH_REST_PORT` is gone. A non-default `OTBR_REST_LISTEN_PORT` is now passed to otbr-web automatically.
+- `OTBR_VENDOR_NAME` and `OTBR_MODEL_NAME` are new (the new base image requires a vendor name); the defaults are fine.
+- Replace `privileged: true` (and any `cap_drop` next to it) with `cap_add: [NET_ADMIN, NET_RAW]` as shown above.
+- The state directory is still `/var/lib/thread`; keep mounting your volume there.
 
 License
 =======
