@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
-  # Build on pushes to main branch
+  # Build on pushes to main (the v2 series)
   push:
     branches:
       - main
@@ -56,12 +56,17 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME }}
+          # Every v2 image gets the full v2-prefixed set (mirrors v1-* on the
+          # legacy v1 branch). As the current series, main additionally owns
+          # the unprefixed aliases latest, YYYYMMDD and sha-<sha>.
           tags: |
             type=sha,format=short
-            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=sha,format=short,prefix=v2-sha-
+            type=raw,value=v2-build-${{ github.run_number }}
             type=raw,value={{date 'YYYYMMDD'}},enable={{is_default_branch}}
+            type=raw,value=v2-{{date 'YYYYMMDD'}},enable={{is_default_branch}}
+            type=raw,value=v2,enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=build-${{ github.run_number }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
