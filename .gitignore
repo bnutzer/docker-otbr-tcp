@@ -1,3 +1,4 @@
 CLAUDE.md
 .claude/settings.local.json
 .idea/
+build-and-push.sh
