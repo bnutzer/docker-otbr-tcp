@@ -125,7 +125,76 @@ docker compose up -d otbr
 > containers, so a dropped `NET_ADMIN` is still fully present. Prefer the
 > explicit `cap_add` above. Because `network_mode: host` shares the host's
 > network namespace, IPv6 forwarding is governed by the **host** sysctls
-> (e.g. `net.ipv6.conf.all.forwarding`), not by per-container settings.
+> (e.g. `net.ipv6.conf.all.forwarding`), not by per-container settings; see
+> [Network pitfalls](#network-pitfalls).
+
+Network pitfalls
+================
+
+Most "the border router runs, but my devices can't be reached / commissioning fails" reports come down to one of the
+following. All of them concern the host and the LAN, not the container, so the image cannot fix them for you.
+
+`OTBR_BACKBONE_IF` must be the LAN-facing interface
+---------------------------------------------------
+
+OTBR sends its Router Advertisements and its mDNS announcements on `OTBR_BACKBONE_IF` only. The default `eth0` rarely
+matches a modern host (`enp3s0`, `end0`, a bridge such as `br0`, …). Set it to the interface that is connected to the
+network your phones and controllers live in. The `<if>` in the sysctls below refers to that same interface.
+
+Host sysctls for IPv6 routing
+-----------------------------
+
+Thread devices get addresses from an off-mesh-routable (OMR) prefix. Border routers announce the route to that prefix
+in Router Advertisements as a *Route Information Option* (RIO). Every host that wants to talk to Thread devices needs to
+accept these routes, and the host running OTBR needs to forward between the Thread and the LAN interface:
+
+```
+# /etc/sysctl.d/60-otbr.conf
+net.ipv6.conf.all.forwarding = 1
+net.ipv6.conf.<if>.accept_ra = 2
+net.ipv6.conf.<if>.accept_ra_rt_info_max_plen = 64
+net.ipv6.conf.<if>.accept_ra_from_local = 1
+```
+
+- `forwarding = 1` lets the host route packets between `wpan0` and the LAN.
+- `accept_ra = 2`: with forwarding enabled, Linux considers itself a router and ignores incoming RAs. `2` makes it
+  accept them anyway. Without it, the host does not learn routes announced by *other* border routers (a second OTBR,
+  an Apple TV, a Nest hub, …), and traffic to Thread devices behind those leaves via the default route.
+- `accept_ra_rt_info_max_plen = 64`: the default `0` makes the kernel ignore RIOs entirely, so even with
+  `accept_ra = 2` no route to the OMR prefix is installed.
+- `accept_ra_from_local = 1`: RAs sent from one of the host's own addresses are dropped by default. This matters when
+  you run several OTBR containers on one host, as their RAs all originate from the host itself.
+
+Note that `accept_ra*` are evaluated per interface — setting them on `all` does not affect existing interfaces. If
+NetworkManager or systemd-networkd manages the interface, they may override these values or process RAs themselves;
+configure RA handling there instead. Other Linux machines on the LAN that must reach Thread devices (e.g. a Matter
+controller on a different host) need `accept_ra_rt_info_max_plen = 64` as well; phones and Apple/Android devices
+accept RIOs out of the box.
+
+Check the result with `ip -6 route show proto ra`, which should list the OMR prefix(es) of the other border routers.
+
+mDNS must reach your phone
+--------------------------
+
+Commissioning (e.g. Matter via the Home Assistant, Apple Home or Google Home app) relies on DNS-SD: the phone discovers
+the border router (`_meshcop._udp`) and, once the device has joined the Thread network, the device itself
+(`_matter._tcp`). Thread devices register their services with OTBR's SRP server, and OTBR's advertising proxy announces
+them via mDNS on `OTBR_BACKBONE_IF`. You do not need an extra component for that — as long as the phone is on the same
+link.
+
+mDNS is link-local multicast and does not cross routers. It breaks if:
+
+- the phone's Wi-Fi is a different subnet or VLAN than the border router's LAN (guest or IoT networks),
+- the access point filters or rate-limits multicast ("multicast enhancement", client isolation, some mesh systems).
+
+In that case something has to carry the announcements across: an mDNS reflector/repeater on the router (e.g. Avahi
+with `enable-reflector=yes`, UniFi "mDNS", OpenWrt `umdns`/`avahi`). Keep in mind that this only solves discovery:
+RAs do not cross subnets either, so the router between the segments additionally needs a route to the OMR prefix via
+the border router's LAN address.
+
+From a machine on the phone's network, `avahi-browse -rt _meshcop._udp` (Linux) or `dns-sd -B _meshcop._udp` (macOS)
+should show your border router. `avahi-browse` is only a client of `avahi-daemon`; without a running daemon on that
+machine it shows nothing, even if the announcements arrive.
 
 Dataset management
 ==================
